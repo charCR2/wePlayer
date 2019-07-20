@@ -296,6 +296,7 @@ function(window){
         },
 
         loadingText: function(query,text){
+            console.warn(text)
             query.$('.weplayer-loadText').innerHTML = text;
         },
 

@@ -1,6 +1,5 @@
 /**
-
- * @author chen rui 2019/7/8
+ * @author chen rui 2019/1/8
  * @param {query: the video row's object }
  * @param {that: this global object ,and include query}
  */
@@ -18,26 +17,109 @@
 }(typeof window !== "undefined" ? window : this,
 
 function(window){
+    var Util = function(){}
+    Util.prototype = {
+        formatSeconds: function(value){
+            var secondTime = parseInt(value);// 秒
+            var minuteTime = 0;// 分
+            var hourTime = 0;// 小时
+            if(secondTime > 60) {//如果秒数大于60，将秒数转换成整数
+                //获取分钟，除以60取整数，得到整数分钟
+                minuteTime = parseInt(secondTime / 60);
+                //获取秒数，秒数取佘，得到整数秒数
+                secondTime = parseInt(secondTime % 60);
+                //如果分钟大于60，将分钟转换成小时
+                if(minuteTime > 60) {
+                    //获取小时，获取分钟除以60，得到整数小时
+                    hourTime = parseInt(minuteTime / 60);
+                    //获取小时后取佘的分，获取分钟除以60取佘的分
+                    minuteTime = parseInt(minuteTime % 60);
+                }
+            }
+            var result = parseInt(secondTime) > 9 ? parseInt(secondTime) : '0' + parseInt(secondTime);
+
+            if(minuteTime > 0) {
+                result = parseInt(minuteTime) > 9? parseInt(minuteTime) : '0' + parseInt(minuteTime)+ ":" + result;
+            }else{
+                result = '00:' + result
+            }
+            if(hourTime > 0) {
+                result = parseInt(hourTime) + ":" + result;
+            }
+            return result;
+        },
+
+        fadeOut: function(ele, speed){
+            var STATIC_SPEED = 50 ;//Animation change speed
+            var ACTION_SPEED = speed || 500;
+
+            if (ele) {
+                var v = ele.style.filter.replace("alpha(opacity=", "").replace(")", "") || ele.style.opacity || 100;
+                v <= 1 && (v = v * 100);
+                var count = Math.ceil(ACTION_SPEED / STATIC_SPEED);
+                var avg = 100 / count;
+                var timer = null;
+                timer = setInterval(function() {
+                    if (v > 0) {
+                        v = v - avg;
+                        setOpacity(ele, v);
+                    } else {
+                        clearInterval(timer);
+                        ele.style.display = 'none'
+                    }
+                },STATIC_SPEED);
+            }
+
+            function setOpacity(ele, opacity) {
+                if (document.all) {
+                    ///兼容ie
+                    ele.style.filter = "alpha(opacity=" + opacity + ")";
+                }
+                else {
+                    ///兼容FF和GG
+                    ele.style.opacity = opacity / 100;
+                }
+            }
+        },
+
+        formatPX: function(s){
+            var a = s.toString();
+            if(a.indexOf('px') !== -1 || a.indexOf("%") !== -1){
+                console.log(a)
+                return a
+            }else{
+                return a + "px"
+            }
+        }
+    }
     var Video = function(video){
         this.video = video; 
         this.isWaiting = true; // this video can play or not
         this.isFull = false; // this video has full or not
+        this.width = video.getAttribute("width") || "700px"
+        this.height = video.getAttribute("height") || "300px"
     };
 
-    Video.prototype = {
+    Video.prototype = new Util();
+    Video.prototype = Object.assign(Video.prototype, {
+        constructor: Video,
         init: function () {
             var that = this;
             var oldVideoParentEle = that.video.parentNode;
             var videoContainer = document.createElement('div');
             videoContainer.className = 'weplayer-container';
-            videoContainer.innerHTML = that.addHtml('all',that.video);
+            videoContainer.innerHTML = that.addHtml('all');
             oldVideoParentEle.replaceChild(videoContainer,that.video);
             videoContainer.insertBefore(that.video,videoContainer.firstChild);
+            videoContainer.style.width = this.formatPX(this.width);
+            videoContainer.style.height = this.formatPX(this.height);
+
             this.query = videoContainer;
             this.query.$ = this.query.querySelector;
             this.query.$All = this.query.querySelectorAll;
             this.query.video = this.query.$('video');
             this.query.video.className = 'weplayer-video-class';
+            
             [
                 this.playListener,
                 this.weplayerFootEvent,
@@ -149,18 +231,21 @@ function(window){
 
         weplayerFootEvent : function(query,that){
             var timer;
+            query.$('.weplayer-foot').style.bottom = -query.$('.weplayer-foot').offsetHeight + 'px';
             query.addEventListener('mousemove',function () {
+                var currentHeight = query.$('.weplayer-foot').offsetHeight;
                 query.$('.weplayer-foot').style.bottom = '0';
                 clearTimeout(timer);
                 timer = setTimeout(function(){
-                    query.$('.weplayer-foot').style.bottom = '-20%';
+                    query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
                     query.$('.weplayer-foot-selectbox').style.top = "100%"
                 },5000);
                 return false
             });
 
             query.addEventListener('mouseleave',function () {
-                query.$('.weplayer-foot').style.bottom = '-20%';
+                var currentHeight = query.$('.weplayer-foot').offsetHeight;
+                query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
                 query.$('.weplayer-foot-selectbox').style.top = "100%";
                 return false
             });
@@ -439,70 +524,7 @@ function(window){
                 default: return container
             }
         },
-
-        formatSeconds: function(value){
-            var secondTime = parseInt(value);// 秒
-            var minuteTime = 0;// 分
-            var hourTime = 0;// 小时
-            if(secondTime > 60) {//如果秒数大于60，将秒数转换成整数
-                //获取分钟，除以60取整数，得到整数分钟
-                minuteTime = parseInt(secondTime / 60);
-                //获取秒数，秒数取佘，得到整数秒数
-                secondTime = parseInt(secondTime % 60);
-                //如果分钟大于60，将分钟转换成小时
-                if(minuteTime > 60) {
-                    //获取小时，获取分钟除以60，得到整数小时
-                    hourTime = parseInt(minuteTime / 60);
-                    //获取小时后取佘的分，获取分钟除以60取佘的分
-                    minuteTime = parseInt(minuteTime % 60);
-                }
-            }
-            var result = parseInt(secondTime) > 9 ? parseInt(secondTime) : '0' + parseInt(secondTime);
-
-            if(minuteTime > 0) {
-                result = parseInt(minuteTime) > 9? parseInt(minuteTime) : '0' + parseInt(minuteTime)+ ":" + result;
-            }else{
-                result = '00:' + result
-            }
-            if(hourTime > 0) {
-                result = parseInt(hourTime) + ":" + result;
-            }
-            return result;
-        },
-
-        fadeOut: function(ele, speed){
-            var STATIC_SPEED = 50 ;//Animation change speed
-            var ACTION_SPEED = speed || 500;
-
-            if (ele) {
-                var v = ele.style.filter.replace("alpha(opacity=", "").replace(")", "") || ele.style.opacity || 100;
-                v <= 1 && (v = v * 100);
-                var count = Math.ceil(ACTION_SPEED / STATIC_SPEED);
-                var avg = 100 / count;
-                var timer = null;
-                timer = setInterval(function() {
-                    if (v > 0) {
-                        v = v - avg;
-                        setOpacity(ele, v);
-                    } else {
-                        clearInterval(timer);
-                        ele.style.display = 'none'
-                    }
-                },STATIC_SPEED);
-            }
-
-            function setOpacity(ele, opacity) {
-                if (document.all) {
-                    ///兼容ie
-                    ele.style.filter = "alpha(opacity=" + opacity + ")";
-                }
-                else {
-                    ///兼容FF和GG
-                    ele.style.opacity = opacity / 100;
-                }
-            }
-        }
-    };
+    });
 
     (function () {
         var videoList = document.querySelectorAll('video[isWePlayer=true]');

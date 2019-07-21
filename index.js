@@ -1,7 +1,7 @@
 /**
- * @author chen rui 2019/1/8
- * @param {query: the video row's object }
- * @param {that: this global object ,and include query}
+ * @author chen rui 20190108
+ * A video player for H5
+ * It's compatible with IE9+, chrome, FireFox, Safari or something else
  */
 
 
@@ -100,8 +100,11 @@ function(window){
         this.height = video.getAttribute("height") || "300px"
     };
 
-    Video.prototype = new Util();
-    Video.prototype = Object.assign(Video.prototype, {
+    /**
+     *   @param {query: the video row's object }
+     *   @param {that: this global object ,and include query}
+     *  */
+    Video.prototype = Object.assign(new Util(), {
         constructor: Video,
         init: function () {
             var that = this;
@@ -238,7 +241,7 @@ function(window){
                 clearTimeout(timer);
                 timer = setTimeout(function(){
                     query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
-                    query.$('.weplayer-foot-selectbox').style.top = "100%"
+                    query.$('.weplayer-foot-voice').style.top = "100%"
                 },5000);
                 return false
             });
@@ -246,7 +249,7 @@ function(window){
             query.addEventListener('mouseleave',function () {
                 var currentHeight = query.$('.weplayer-foot').offsetHeight;
                 query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
-                query.$('.weplayer-foot-selectbox').style.top = "100%";
+                query.$('.weplayer-foot-voice').style.top = "100%";
                 return false
             });
 
@@ -387,14 +390,20 @@ function(window){
 
         settingListener: function(query,that){
             query.$('img[v-id=voiceSet]').addEventListener('mousemove',function(e){
-                var box = query.$('.weplayer-foot-selectbox');
+                var box = query.$('.weplayer-foot-voice');
                 box.style.top = '-200%';
                 box.style.opacity = '1'
             });
             query.$('.weplayer-voice-barBox').addEventListener('mouseleave',function(e){
-                var box = query.$('.weplayer-foot-selectbox');
+                var box = query.$('.weplayer-foot-voice');
                 box.style.top = '100%';
                 box.style.opacity ='0'
+            });
+
+            query.$('img[v-id=isSetting]').addEventListener('mousemove',function(e){
+                var box = query.$('.weplayer-foot-voice');
+                box.style.top = '-200%';
+                box.style.opacity = '1'
             });
         },
 
@@ -487,7 +496,7 @@ function(window){
                 '        <div class="weplayer-foot-setting-row">\n' +
                 '            <div class="weplayer-foot-setting-box weplayer-voice-barBox" >\n' +
                 '                <img src="img/voice.png" v-id="voiceSet"/>\n' +
-                '                <div class="weplayer-foot-selectbox">\n' +
+                '                <div class="weplayer-foot-voice">\n' +
                 '                    <div class="voice-barBox" id="voice-barBox">\n' +
                 '                        <div class="voice-barColor"></div>\n' +
                 '                        <div class="voice-barBlock"></div>\n' +
@@ -496,6 +505,12 @@ function(window){
                 '            </div>\n' +
                 '            <div class="weplayer-foot-setting-box weplayer-full-barBox">\n' +
                 '                <img src="img/big.png" v-id="isFull"/>\n' +
+                '            </div>\n' +
+                '            <div class="weplayer-foot-setting-box weplayer-setting-barBox">\n' +
+                '                <img src="img/setting.png" v-id="isSetting"/>\n' +
+                '                <div class="weplayer-foot-set">\n' +
+                '                <div><label>倍速播放</label><div></div> </div>'+
+                '                </div>\n' +
                 '            </div>\n' +
                 '        </div>\n';
 

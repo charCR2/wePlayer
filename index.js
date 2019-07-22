@@ -236,14 +236,15 @@ function(window){
             var timerBuffer = setInterval(function(){
                 //old buffered handle
                 var hasbuffered = 0;
-                console.log(query.video.buffered.length,that.buffered)
+                // console.log(query.video.buffered.length,that.buffered)
                 for(var j = 0; j < that.buffered; j++ ){
                     var start = query.video.buffered.start(j);
                     var end = query.video.buffered.end(j);
                     var left = start / currentTime * currentWidth;
                     var width = (end / currentTime * currentWidth) - left;
                     query.$('wePlayer-time-buffered[v-buffered='+j+']').style.width = width+"px";
-                    hasbuffered += end - start
+                    hasbuffered += end - start;
+                    console.log('进入',left,width,currentWidth,currentTime,start,end)
                 }
                 //new buffered handle
                 if(query.video.buffered.length > that.buffered){

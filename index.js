@@ -243,7 +243,7 @@ function(window){
                     var end = query.video.buffered.end(j);
                     var left = start / currentTime * currentWidth;
                     var width = (end / currentTime * currentWidth) - left;
-                    query.$('wePlayer-time-buffered[v-buffered='+j+']').style.width = width+"px";
+                    query.$('.wePlayer-time-buffered[v-buffered='+j+']').style.width = width+"px";
                     hasbuffered += end - start;
                     console.log('进入',left,width,currentWidth,currentTime,start,end)
                 }

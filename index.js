@@ -236,6 +236,7 @@ function(window){
             var timerBuffer = setInterval(function(){
                 //old buffered handle
                 var hasbuffered = 0;
+                var len = query.video.buffered.length
                 // console.log(query.video.buffered.length,that.buffered)
                 for(var j = 0; j < that.buffered; j++ ){
                     var start = query.video.buffered.start(j);
@@ -247,8 +248,8 @@ function(window){
                     console.log('进入',left,width,currentWidth,currentTime,start,end)
                 }
                 //new buffered handle
-                if(query.video.buffered.length > that.buffered){
-                    for(var i = that.buffered; i < query.video.buffered.length - that.buffered; i++ ){
+                if(len > that.buffered){
+                    for(var i = that.buffered; i < len - that.buffered; i++ ){
                         var start = query.video.buffered.start(i);
                         var end = query.video.buffered.end(i);
                       
@@ -264,7 +265,7 @@ function(window){
                         hasbuffered += end - start
                     }
 
-                    that.buffered = query.video.buffered;
+                    that.buffered = len;
                 }
 
                 if(hasbuffered>=currentTime) clearInterval(timerBuffer);

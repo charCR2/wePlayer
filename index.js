@@ -17,27 +17,21 @@
 }(typeof window !== "undefined" ? window : this,
 
 function(window){
-    var Util = function(){}
+    var Util = function(){};
     Util.prototype = {
         formatSeconds: function(value){
-            var secondTime = parseInt(value);// 秒
-            var minuteTime = 0;// 分
-            var hourTime = 0;// 小时
-            if(secondTime > 60) {//如果秒数大于60，将秒数转换成整数
-                //获取分钟，除以60取整数，得到整数分钟
+            var secondTime = parseInt(value);
+            var minuteTime = 0;
+            var hourTime = 0;
+            if(secondTime > 60) {
                 minuteTime = parseInt(secondTime / 60);
-                //获取秒数，秒数取佘，得到整数秒数
                 secondTime = parseInt(secondTime % 60);
-                //如果分钟大于60，将分钟转换成小时
                 if(minuteTime > 60) {
-                    //获取小时，获取分钟除以60，得到整数小时
                     hourTime = parseInt(minuteTime / 60);
-                    //获取小时后取佘的分，获取分钟除以60取佘的分
                     minuteTime = parseInt(minuteTime % 60);
                 }
             }
             var result = parseInt(secondTime) > 9 ? parseInt(secondTime) : '0' + parseInt(secondTime);
-
             if(minuteTime > 0) {
                 result = parseInt(minuteTime) > 9? parseInt(minuteTime) : '0' + parseInt(minuteTime)+ ":" + result;
             }else{
@@ -92,12 +86,14 @@ function(window){
             }
         }
     }
+
     var Video = function(video){
         this.video = video; 
         this.isWaiting = true; // this video can play or not
         this.isFull = false; // this video has full or not
-        this.width = video.getAttribute("width") || "700px"
-        this.height = video.getAttribute("height") || "300px"
+        this.buffered = 0; 
+        this.width = video.getAttribute("width") || "700px";
+        this.height = video.getAttribute("height") || "300px";
     };
 
     /**
@@ -133,7 +129,8 @@ function(window){
                 this.fullListener,
                 this.full,
                 this.loadingShow,
-                this.loadingHide
+                this.loadingHide,
+                
             ].forEach(function (item) {
                 item(that.query,that);
             });
@@ -141,6 +138,7 @@ function(window){
             for(var key in this.videoCycle){
                 that.videoCycle[key](that.query,that)
             }
+            this.query.video.load();
         },
 
         pause: function(query,that){
@@ -232,7 +230,47 @@ function(window){
             })
         },
 
-        weplayerFootEvent : function(query,that){
+        bufferedListener: function(query,that){
+            var currentWidth = query.$('.barBox').offsetWidth;
+            var currentTime = query.video.duration;
+            var timerBuffer = setInterval(function(){
+                //old buffered handle
+                var hasbuffered = 0;
+                console.log(query.video.buffered.length,that.buffered)
+                for(var j = 0; j < that.buffered; j++ ){
+                    var start = query.video.buffered.start(j);
+                    var end = query.video.buffered.end(j);
+                    var left = start / currentTime * currentWidth;
+                    var width = (end / currentTime * currentWidth) - left;
+                    query.$('wePlayer-time-buffered[v-buffered='+j+']').style.width = width+"px";
+                    hasbuffered += end - start
+                }
+                //new buffered handle
+                if(query.video.buffered.length > that.buffered){
+                    for(var i = that.buffered; i < query.video.buffered.length - that.buffered; i++ ){
+                        var start = query.video.buffered.start(i);
+                        var end = query.video.buffered.end(i);
+                      
+                        var left = start / currentTime * currentWidth;
+                        var width = (end / currentTime * currentWidth) - left;
+                        var div = document.createElement('div');
+                        div.className = "wePlayer-time-buffered";
+                        div.setAttribute("v-buffered",i);
+                        div.style.left = left + 'px';
+                        div.style.width = width + 'px';
+                        console.log('进入',left,width,currentWidth,currentTime,start,end)
+                        query.$('#barBox').appendChild(div);
+                        hasbuffered += end - start
+                    }
+
+                    that.buffered = query.video.buffered;
+                }
+
+                if(hasbuffered>=currentTime) clearInterval(timerBuffer);
+            },1000)
+        },
+
+        weplayerFootEvent: function(query,that){
             var timer;
             query.$('.weplayer-foot').style.bottom = -query.$('.weplayer-foot').offsetHeight + 'px';
             query.addEventListener('mousemove',function () {
@@ -433,6 +471,7 @@ function(window){
                 query.video.addEventListener("durationchange", function(){
                     that.loadingText(query,'时长获取完毕！');
                     that.loadingText(query,'开始获取视频元数据...');
+                    that.bufferedListener(query,that)
                  });  
             },
 
@@ -467,6 +506,7 @@ function(window){
                     }
                     that.loadingHide(query,that)
                     query.$(".video-time").innerHTML = that.formatSeconds(query.video.duration);
+                   
                 };
             },
 

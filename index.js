@@ -238,7 +238,7 @@ function(window){
                 var hasbuffered = 0;
                 var len = query.video.buffered.length
                 // console.log(query.video.buffered.length,that.buffered)
-                for(var j = 0; j < that.buffered; j++ ){
+                for(var j = 0; j < len; j++ ){
                     var start = query.video.buffered.start(j);
                     var end = query.video.buffered.end(j);
                     var left = start / currentTime * currentWidth;
@@ -264,10 +264,8 @@ function(window){
                         query.$('#barBox').appendChild(div);
                         hasbuffered += end - start
                     }
-
-                    that.buffered = len;
                 }
-
+                that.buffered = len;
                 if(hasbuffered>=currentTime) clearInterval(timerBuffer);
             },1000)
         },

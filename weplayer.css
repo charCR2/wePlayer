@@ -130,7 +130,7 @@
     height: 6px;
     border-radius: 10px;
     position: absolute;
-    background: #000;
+    background: #666;
     z-index: -1;
 }
 .weplayer-foot-time{

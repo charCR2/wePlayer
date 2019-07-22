@@ -44,7 +44,7 @@ function(window){
         },
 
         fadeOut: function(ele, speed){
-            var STATIC_SPEED = 50 ;//Animation change speed
+            var STATIC_SPEED = 50 ; //Animation change speed
             var ACTION_SPEED = speed || 500;
 
             if (ele) {
@@ -130,7 +130,6 @@ function(window){
                 this.full,
                 this.loadingShow,
                 this.loadingHide,
-                
             ].forEach(function (item) {
                 item(that.query,that);
             });
@@ -143,15 +142,15 @@ function(window){
 
         pause: function(query,that){
             query.$("#weplayer-foot-play").innerHTML='<img src="img/play.png" v-id="play" class="weplayer-mask-Img play"/>';
-            query.$("#weplayer-center-logo").innerHTML='<img src="img/play.png"  v-id="play" class="weplayer-mask-Img play"  />';
+            query.$("#weplayer-center-logo").innerHTML='<img src="img/play.png"  v-id="play" class="weplayer-mask-Img play" />';
             if(!that.isWaiting){
                 query.$("#weplayer-center-logo").style.opacity = '1';
                 query.$("#weplayer-mask").style.opacity = '1';
                 query.$("#weplayer-center-logo").style.display = 'block';
                 query.$("#weplayer-mask").style.display = 'block';
+                query.video.pause();
             }
             that.playListener(query,that);
-            query.video.pause();
         },
 
         play: function(query,that){
@@ -161,10 +160,9 @@ function(window){
             if(!that.isWaiting){
                 that.fadeOut(query.$("#weplayer-center-logo"),800);
                 that.fadeOut(query.$("#weplayer-mask"),400);
+                query.video.play();
             }
             that.pauseListener(query,that);
-            query.video.play();
-            return false
         },
 
         full: function(query,that){
@@ -233,6 +231,9 @@ function(window){
         bufferedListener: function(query,that){
             var currentWidth = query.$('.barBox').offsetWidth;
             var currentTime = query.video.duration;
+            query.$All('.wePlayer-time-buffered').forEach(function(item){
+                query.$('#barBox').removeChild(item)
+            })
             var timerBuffer = setInterval(function(){
               
                 var hasbuffered = 0;
@@ -242,9 +243,9 @@ function(window){
                     for(var i = that.buffered; i < len; i++ ){
                         var start = query.video.buffered.start(i);
                         var end = query.video.buffered.end(i);
-                      
                         var left = start / currentTime * currentWidth;
                         var width = (end / currentTime * currentWidth) - left;
+
                         var div = document.createElement('div');
                         div.className = "wePlayer-time-buffered";
                         div.setAttribute("v-buffered",i);
@@ -261,12 +262,13 @@ function(window){
                     var end = query.video.buffered.end(j);
                     var left = start / currentTime * currentWidth;
                     var width = (end / currentTime * currentWidth) - left;
+
                     query.$('.wePlayer-time-buffered[v-buffered="'+j+'"]').style.width = width+"px";
                     hasbuffered += end - start;
                 }
-                
+
                 that.buffered = len;
-                if(hasbuffered>=currentTime) clearInterval(timerBuffer);
+                if(hasbuffered >= currentTime) clearInterval(timerBuffer);
             },1000)
         },
 
@@ -305,7 +307,6 @@ function(window){
             var startX ; // 鼠标开始按下的位置
             var barBoxWidth = barBox.offsetWidth;
 
-            //初始化视频进度
             var initNum = (query.video.currentTime / query.video.duration)* barBoxWidth;
             barColor.style.width = initNum + "px";//更新色块位置
             barBlock.style.left = initNum + "px";//更新小方块位置
@@ -471,21 +472,21 @@ function(window){
                     that.loadingText(query,'时长获取完毕！');
                     that.loadingText(query,'开始获取视频元数据...');
                     that.bufferedListener(query,that)
-                 });  
+                });  
             },
 
             onLoadedMetaData: function(query,that){
                 query.video.addEventListener("loadedmetadata", function(){
                     that.loadingText(query,'视频元数据获取完毕！');
                     that.loadingText(query,'正在获取视频帧数据...')
-                 });
+                });
             },
 
             onLoadedData: function(query,that){
                 query.video.addEventListener("loadeddata", function(){
                     that.loadingText(query,'视频帧数据获取完毕！');
                     that.loadingText(query,'正在缓冲视频...')
-                 });
+                });
             },
 
             onWaiting: function(query,that,d){
@@ -493,7 +494,7 @@ function(window){
                     that.loadingText(query,'正在缓冲视频...');
                     that.isWaiting = true;
                     that.loadingShow(query,that)
-                 });
+                });
             },
 
             onCanPlay: function (query,that) {
@@ -505,16 +506,21 @@ function(window){
                     }
                     that.loadingHide(query,that)
                     query.$(".video-time").innerHTML = that.formatSeconds(query.video.duration);
-                   
                 };
             },
 
-            ended: function (query,that) {
+            onEnded: function (query,that) {
                 query.video.addEventListener("ended", function(){
                     that.pause(query,that);
                     query.video.currentTime = 0;
                 });
             },
+
+            onError: function(query,that){
+                query.video.addEventListener("error", function(){
+                    that.loadingText(query,'视频源出错！');
+                });
+            }
         },
 
         addHtml: function(place,video){
@@ -559,11 +565,11 @@ function(window){
                 '    <div class="weplayer-load-center">'+
                 '    <p class="weplayer-loadText"><p>'+
                 '    <div class="weplayer-load">\n' +
-                '    <span></span>\n' +
-                '    <span></span>\n' +
-                '    <span></span>\n' +
-                '    <span></span>\n' +
-                '    <span></span>\n' +
+                '       <span></span>\n' +
+                '       <span></span>\n' +
+                '       <span></span>\n' +
+                '       <span></span>\n' +
+                '       <span></span>\n' +
                 '    </div>'+
                 '    </div>\n' +
                 '    <div class="weplayer-center-logo" id="weplayer-center-logo">\n' +

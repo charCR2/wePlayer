@@ -234,20 +234,10 @@ function(window){
             var currentWidth = query.$('.barBox').offsetWidth;
             var currentTime = query.video.duration;
             var timerBuffer = setInterval(function(){
-                //old buffered handle
+              
                 var hasbuffered = 0;
-                var len = query.video.buffered.length
-                // console.log(query.video.buffered.length,that.buffered)
-                for(var j = 0; j < len; j++ ){
-                    var start = query.video.buffered.start(j);
-                    var end = query.video.buffered.end(j);
-                    var left = start / currentTime * currentWidth;
-                    var width = (end / currentTime * currentWidth) - left;
-                    query.$('.wePlayer-time-buffered[v-buffered="'+j+'"]').style.width = width+"px";
-                    hasbuffered += end - start;
-                    console.log('进入1',left,width,currentWidth,currentTime,start,end)
-                }
-                //new buffered handle
+                var len = query.video.buffered.length;
+                 //new buffered handle
                 if(len > that.buffered){
                     for(var i = that.buffered; i < len; i++ ){
                         var start = query.video.buffered.start(i);
@@ -265,6 +255,18 @@ function(window){
                         hasbuffered += end - start
                     }
                 }
+
+                //old buffered handle
+                for(var j = 0; j < len; j++ ){
+                    var start = query.video.buffered.start(j);
+                    var end = query.video.buffered.end(j);
+                    var left = start / currentTime * currentWidth;
+                    var width = (end / currentTime * currentWidth) - left;
+                    query.$('.wePlayer-time-buffered[v-buffered="'+j+'"]').style.width = width+"px";
+                    hasbuffered += end - start;
+                    console.log('进入1',left,width,currentWidth,currentTime,start,end)
+                }
+               
                 that.buffered = len;
                 if(hasbuffered>=currentTime) clearInterval(timerBuffer);
             },1000)
@@ -463,7 +465,6 @@ function(window){
                     that.loadingShow(query,that);
                     that.isWaiting = true;
                     that.loadingText(query,'开始获取视频...');
-                    that.loadingText(query,'正在获取时长...');
                 })()
             },
 

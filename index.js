@@ -250,7 +250,6 @@ function(window){
                         div.setAttribute("v-buffered",i);
                         div.style.left = left + 'px';
                         div.style.width = width + 'px';
-                        console.log('进入2',left,width,currentWidth,currentTime,start,end)
                         query.$('#barBox').appendChild(div);
                         hasbuffered += end - start
                     }
@@ -264,9 +263,8 @@ function(window){
                     var width = (end / currentTime * currentWidth) - left;
                     query.$('.wePlayer-time-buffered[v-buffered="'+j+'"]').style.width = width+"px";
                     hasbuffered += end - start;
-                    console.log('进入1',left,width,currentWidth,currentTime,start,end)
                 }
-               
+                
                 that.buffered = len;
                 if(hasbuffered>=currentTime) clearInterval(timerBuffer);
             },1000)

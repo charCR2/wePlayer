@@ -96,6 +96,7 @@ function(window){
 
         this.isWaiting = true; // this video can play or not
         this.isFull = false; // this video has full or not
+        this.timerBuffer
     };
 
     /**
@@ -140,6 +141,11 @@ function(window){
                 that.videoCycle[key](that.query,that)
             }
             this.query.video.load();
+            window.onresize = function () {
+                that.query.$('#barBox').style.width = '100%'
+                that.setSwiper(that.query,that);
+                that.bufferedListener(that.query,that)
+            }
         },
 
         pause: function(query,that){
@@ -222,8 +228,9 @@ function(window){
                         that.settingListener,
                         that.setSwiper,
                         that.setSwiperVoice,
+                        that.bufferedListener,
                         that.cancelBubble,
-                        that.full,
+                        that.full
                     ].forEach(function (item) {
                         item(that.query,that);
                     });
@@ -237,7 +244,9 @@ function(window){
             query.$All('.wePlayer-time-buffered').forEach(function(item){
                 query.$('#barBox').removeChild(item)
             })
-            var timerBuffer = setInterval(function(){
+            clearInterval(that.timerBuffer);
+            that.buffered = 0
+            that.timerBuffer = setInterval(function(){
               
                 var hasbuffered = 0;
                 var len = query.video.buffered.length;
@@ -258,7 +267,6 @@ function(window){
                         hasbuffered += end - start
                     }
                 }
-
                 //old buffered handle
                 for(var j = 0; j < len; j++ ){
                     var start = query.video.buffered.start(j);
@@ -271,7 +279,8 @@ function(window){
                 }
 
                 that.buffered = len;
-                if(hasbuffered >= currentTime) clearInterval(timerBuffer);
+                if(hasbuffered >= currentTime) clearInterval( that.timerBuffer);
+
             },1000)
         },
 
@@ -441,25 +450,36 @@ function(window){
         settingListener: function(query,that){
             var barBox =  query.$('.weplayer-voice-barBox');
             var settingBox = query.$('.weplayer-setting-barBox');
+            var timeBar,timeSet;
             query.$('img[v-id=voiceSet]').addEventListener('mousemove',function(e){
+                clearTimeout(timeBar)
+
                 var box = query.$('.weplayer-foot-voice');
+                box.style.display = 'flex'
                 box.style.top = - box.offsetHeight + 'px';
                 box.style.opacity = '1';
                 barBox.style.zIndex = '4';
+                
             });
+
             barBox.addEventListener('mouseleave',function(e){
                 var box = query.$('.weplayer-foot-voice');
                 box.style.top = - box.offsetHeight + 10 + 'px';
                 box.style.opacity ='0';
                 barBox.style.zIndex = '3';
-
-            });
+                timeBar = setTimeout(function (){
+                    box.style.display = 'none'
+                },200);
+            })
 
             query.$('img[v-id=isSetting]').addEventListener('mousemove',function(e){
+                clearTimeout(timeSet);  
                 var box = query.$('.weplayer-foot-set');
+                box.style.display = 'block'
                 box.style.top = - box.offsetHeight + 'px';
                 box.style.opacity = '1';
                 settingBox.style.zIndex = '4';
+                
             });
 
             query.$('.weplayer-setting-barBox').addEventListener('mouseleave',function(e){
@@ -467,13 +487,14 @@ function(window){
                 box.style.top = - box.offsetHeight + 10 + 'px';
                 box.style.opacity = '0';
                 settingBox.style.zIndex = '3';
+                timeSet = setTimeout(function (){
+                    box.style.display = 'none'
+                },200);
             });
 
             var header = query.$('.weplayer-set-panel-header');
             var body = query.$('.weplayer-set-panel-body');
             var height = body.scrollHeight;
-
-
             header.addEventListener('click', function() {
                 var img = header.querySelector('img');
                 var bodyHeight = body.style.height.toString();
@@ -496,7 +517,6 @@ function(window){
                     query.video.playbackRate = input.value;
                 })
             })
-
         },
 
         cancelBubble: function(query){

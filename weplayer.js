@@ -87,13 +87,15 @@ function(window){
     };
 
     var Video = function(video){
-        this.video = video; 
-        this.isWaiting = true; // this video can play or not
-        this.isFull = false; // this video has full or not
-        this.buffered = 0; 
+        this.video = video;
         this.width = video.getAttribute("width") || "700px";
         this.height = video.getAttribute("height") || "300px";
+
         this.playSpeed = 1;
+        this.buffered = 0;
+
+        this.isWaiting = true; // this video can play or not
+        this.isFull = false; // this video has full or not
     };
 
     /**
@@ -203,14 +205,15 @@ function(window){
                     query.$(".weplayer-full-barBox").innerHTML='<img src="img/big.png" class="setting-icon" v-id="isFull" v-id="isFull"/>'
                 }
                 console.log('当前是否播放',query.video.paused);
+                var footPlayBox = query.$("#weplayer-foot-play")
                 if(!query.video.paused){
-                    query.$("#weplayer-foot-play").innerHTML='<img src="img/pause.png" v-id="pause" class="weplayer-mask-Img pause"/>';
-                    query.$("#weplayer-foot-play").addEventListener('click',function (e) {
+                    footPlayBox.innerHTML='<img src="img/pause.png" v-id="pause" class="weplayer-mask-Img pause"/>';
+                    footPlayBox.querySelector('img[v-id=pause]').addEventListener('click',function (e) {
                         that.pause(query,that)
                     })
                 }else{
-                    query.$("#weplayer-foot-play").innerHTML='<img src="img/play.png" v-id="play" class="weplayer-mask-Img play"/>';
-                    query.$("#weplayer-foot-play").addEventListener('click',function (e) {
+                    footPlayBox.innerHTML='<img src="img/play.png" v-id="play" class="weplayer-mask-Img play"/>';
+                    footPlayBox.querySelector('img[v-id=play]').addEventListener('click',function (e) {
                         that.play(query,that)
                     })
                 }

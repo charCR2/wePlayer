@@ -79,13 +79,12 @@ function(window){
         formatPX: function(s){
             var a = s.toString();
             if(a.indexOf('px') !== -1 || a.indexOf("%") !== -1){
-                console.log(a)
                 return a
             }else{
                 return a + "px"
             }
         }
-    }
+    };
 
     var Video = function(video){
         this.video = video; 
@@ -94,6 +93,7 @@ function(window){
         this.buffered = 0; 
         this.width = video.getAttribute("width") || "700px";
         this.height = video.getAttribute("height") || "300px";
+        this.playSpeed = 1;
     };
 
     /**
@@ -198,9 +198,9 @@ function(window){
                 query.$('.weplayer-foot').innerHTML =  that.addHtml('foot');
                 query.$(".video-time").innerHTML = that.formatSeconds(query.video.duration);
                 if(that.isFull){
-                    query.$(".weplayer-full-barBox").innerHTML='<img src="img/small.png" v-id="isFull" v-id="isFull"/>'
+                    query.$(".weplayer-full-barBox").innerHTML='<img src="img/small.png" class="setting-icon" v-id="isFull" v-id="isFull"/>'
                 }else {
-                    query.$(".weplayer-full-barBox").innerHTML='<img src="img/big.png" v-id="isFull" v-id="isFull"/>'
+                    query.$(".weplayer-full-barBox").innerHTML='<img src="img/big.png" class="setting-icon" v-id="isFull" v-id="isFull"/>'
                 }
                 console.log('当前是否播放',query.video.paused);
                 if(!query.video.paused){
@@ -281,7 +281,11 @@ function(window){
                 clearTimeout(timer);
                 timer = setTimeout(function(){
                     query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
-                    query.$('.weplayer-foot-voice').style.top = "100%"
+                    query.$('.weplayer-foot-voice').style.top = "90%";
+                    query.$('.weplayer-foot-voice').style.opacity = "0";
+                    var box = query.$('.weplayer-foot-set');
+                    box.style.top = - box.offsetHeight + 10 + 'px';
+                    box.style.opacity = '0';
                 },5000);
                 return false
             });
@@ -289,14 +293,18 @@ function(window){
             query.addEventListener('mouseleave',function () {
                 var currentHeight = query.$('.weplayer-foot').offsetHeight;
                 query.$('.weplayer-foot').style.bottom = -currentHeight + 'px';
-                query.$('.weplayer-foot-voice').style.top = "100%";
+                query.$('.weplayer-foot-voice').style.top = "90%";
+                query.$('.weplayer-foot-voice').style.opacity = "0";
+                var box = query.$('.weplayer-foot-set');
+                box.style.top = - box.offsetHeight + 10 + 'px';
+                box.style.opacity = '0';
                 return false
             });
 
             query.addEventListener('click',function () {
                 that.pause(query,that);
                 return false
-            })
+            });
         },
 
         setSwiper: function(query,that){
@@ -423,33 +431,75 @@ function(window){
         },
 
         loadingText: function(query,text){
-            console.warn(text)
+            console.warn(text);
             query.$('.weplayer-loadText').innerHTML = text;
         },
 
         settingListener: function(query,that){
+            var barBox =  query.$('.weplayer-voice-barBox');
+            var settingBox = query.$('.weplayer-setting-barBox');
             query.$('img[v-id=voiceSet]').addEventListener('mousemove',function(e){
                 var box = query.$('.weplayer-foot-voice');
-                box.style.top = '-200%';
-                box.style.opacity = '1'
+                box.style.top = - box.offsetHeight + 'px';
+                box.style.opacity = '1';
+                barBox.style.zIndex = '4';
             });
-            query.$('.weplayer-voice-barBox').addEventListener('mouseleave',function(e){
+            barBox.addEventListener('mouseleave',function(e){
                 var box = query.$('.weplayer-foot-voice');
-                box.style.top = '100%';
-                box.style.opacity ='0'
+                box.style.top = - box.offsetHeight + 10 + 'px';
+                box.style.opacity ='0';
+                barBox.style.zIndex = '3';
+
             });
 
             query.$('img[v-id=isSetting]').addEventListener('mousemove',function(e){
-                var box = query.$('.weplayer-foot-voice');
-                box.style.top = '-200%';
-                box.style.opacity = '1'
+                var box = query.$('.weplayer-foot-set');
+                box.style.top = - box.offsetHeight + 'px';
+                box.style.opacity = '1';
+                settingBox.style.zIndex = '4';
             });
+
+            query.$('.weplayer-setting-barBox').addEventListener('mouseleave',function(e){
+                var box = query.$('.weplayer-foot-set');
+                box.style.top = - box.offsetHeight + 10 + 'px';
+                box.style.opacity = '0';
+                settingBox.style.zIndex = '3';
+            });
+
+            var header = query.$('.weplayer-set-panel-header');
+            var body = query.$('.weplayer-set-panel-body');
+            var height = body.scrollHeight;
+
+
+            header.addEventListener('click', function() {
+                var img = header.querySelector('img');
+                var bodyHeight = body.style.height.toString();
+                if (!!bodyHeight && bodyHeight !== '0px') {
+                    body.style.height = '0px';
+                    img.style.transform = "rotate(0)";
+                } else {
+                    body.style.height = height + 'px';
+                    img.style.transform = "rotate(90deg)";
+                }
+            });
+
+            body.querySelectorAll('li').forEach(function (item) {
+                var input = item.querySelector('input');
+                input.checked = parseFloat(input.value) == that.playSpeed ? true : false
+                item.addEventListener('click', function() {
+                    console.log('current play speed',input.value);
+                    input.checked = true;
+                    that.playSpeed = input.value;
+                    query.video.playbackRate = input.value;
+                })
+            })
+
         },
 
         cancelBubble: function(query){
             query.$(".weplayer-foot").addEventListener('click',function(e){
                 e.preventDefault();
-                window.event? window.event.cancelBubble = true : e.stopPropagation();
+                window.event ? window.event.cancelBubble = true : e.stopPropagation();
             });
                 
             query.$(".weplayer-load-center").addEventListener('click',function(e){
@@ -524,7 +574,8 @@ function(window){
         },
 
         addHtml: function(place,video){
-            var foot = ' <div class="weplayer-foot-play" id="weplayer-foot-play">\n' +
+            var foot = '<div class="weplayer-foot-left">' +
+                '       <div class="weplayer-foot-play" id="weplayer-foot-play">\n' +
                 '            <img src="img/play.png" class="play" v-id="play"/>\n' +
                 '        </div>\n' +
                 '            <div class="barBox" id="barBox">\n' +
@@ -538,9 +589,10 @@ function(window){
                 '               <span class="video-time">00:00</span>'+
                 '            </div>\n' +
                 '        </div>\n' +
-                '        <div class="weplayer-foot-setting-row">\n' +
+                '   </div>'+
+                '        <div class="weplayer-foot-right">\n' +
                 '            <div class="weplayer-foot-setting-box weplayer-voice-barBox" >\n' +
-                '                <img src="img/voice.png" v-id="voiceSet"/>\n' +
+                '                <img src="img/voice.png" class="setting-icon" v-id="voiceSet"/>\n' +
                 '                <div class="weplayer-foot-voice">\n' +
                 '                    <div class="voice-barBox" id="voice-barBox">\n' +
                 '                        <div class="voice-barColor"></div>\n' +
@@ -549,12 +601,49 @@ function(window){
                 '                </div>\n' +
                 '            </div>\n' +
                 '            <div class="weplayer-foot-setting-box weplayer-full-barBox">\n' +
-                '                <img src="img/big.png" v-id="isFull"/>\n' +
+                '                <img src="img/big.png" class="setting-icon" v-id="isFull"/>\n' +
                 '            </div>\n' +
                 '            <div class="weplayer-foot-setting-box weplayer-setting-barBox">\n' +
-                '                <img src="img/setting.png" v-id="isSetting"/>\n' +
+                '                <img src="img/setting.png" class="setting-icon" v-id="isSetting"/>\n' +
                 '                <div class="weplayer-foot-set">\n' +
-                '                <div><label>倍速播放</label><div></div> </div>'+
+                '                   <div class="weplayer-set-tip weplayer-set-panel-header">' +
+                '                       <label>倍速播放</label>' +
+                '                       <img src="img/right.png" class="setRight"/>' +
+                '                   </div>\n' +
+                '                   <ul class="weplayer-set-panel-body">' +
+                '                        <li>' +
+                '                           <label for="man" class="radio">\n' +
+                '                               <span class="radio-bg"></span>\n' +
+                '                               <input type="radio" name="sex" id="man" value="0.75" /> 0.75\n' +
+                '                               <span class="radio-on"></span>\n' +
+                '                           </label>' +
+                '                         </li>' +
+                '                        <li>' +
+                '                           <label for="man" class="radio">\n' +
+                '                               <span class="radio-bg"></span>\n' +
+                '                               <input type="radio" name="sex" id="man" value="1" checked="true" /> 1\n' +
+                '                               <span class="radio-on"></span>\n' +
+                '                           </label>' +
+                '                         </li>' +
+                '                        <li>' +
+                '                           <label for="man" class="radio">\n' +
+                '                               <span class="radio-bg"></span>\n' +
+                '                               <input type="radio" name="sex" id="man" value="1.25" /> 1.25\n' +
+                '                               <span class="radio-on"></span>\n' +
+                '                           </label>' +
+                '                         </li>' +
+
+                '                   </ul>'+
+
+                '                   <div class="weplayer-set-tip weplayer-set-panel-header">' +
+                '                       <label>敬请期待</label>' +
+                '                       <img src="img/right.png" class="setRight"/>' +
+                '                   </div>\n' +
+                '                   <ul class="weplayer-set-panel-body">' +
+                '                        <li>0.75</li>' +
+                '                        <li>1</li>' +
+                '                        <li>1.25</li>' +
+                '                   </ul>'+
                 '                </div>\n' +
                 '            </div>\n' +
                 '        </div>\n';

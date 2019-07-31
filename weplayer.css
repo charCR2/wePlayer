@@ -1,9 +1,16 @@
+
 .weplayer-container{
     width: 800px;
     height: 300px;
     position: relative;
     margin: 0 auto;
     overflow: hidden;
+
+}
+.weplayer-container *{
+    box-sizing:border-box;
+    margin: 0;
+    padding: 0;
 }
 
 .weplayer-video-class{
@@ -64,17 +71,24 @@
     width: 100%;
     height: 10%;
     min-height:40px ;
-    max-height:100px ;
+    max-height:50px ;
 
     background: rgba(0,0,0,.9);
 
     transition: all 200ms;
     display: flex
 }
+.weplayer-foot-left{
+    width: 50%;
+    height: 100%;
+    display: flex;
+}
 
 .weplayer-foot-play{
-    width: 15%;
+    width: 20%;
     height: 100%;
+    max-width: 80px;
+    min-width: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -101,7 +115,7 @@
 .barBox{
     height: 6px;
     width: 100%;
-    background: rgb(255, 255, 255,0.3);
+    background: rgba(255, 255, 255, 0.3);
     position: absolute;
     top: -6px;
     cursor: pointer;
@@ -142,21 +156,23 @@
     color: #eee
  }
 
-.weplayer-foot-setting-row{
-    width: 60%;
+.weplayer-foot-right{
+    width: 50%;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    padding:0 3% ;
-}  
+    padding:0 20px ;
+}
+
 .weplayer-foot-setting-box{
-    width: 12%;
-    min-width: 35px;
-    max-width: 120px;
+    width: 15%;
+    min-width: 40px;
+    max-width: 60px;
     height: 100%;
     position: relative;
-} 
-.weplayer-foot-setting-box img{
+}
+
+.weplayer-foot-setting-box .setting-icon{
     height: 45%;
     position: absolute;
     left: 50%;
@@ -168,20 +184,67 @@
 .weplayer-foot-voice{
     position: absolute;
     z-index: 4;
-    top:100%;
+    top:-100px;
 
     width: 100%;
-    height: 200%;
+    height: 100px;
     max-width: 100px;
-    max-height: 200px;
-
     background: rgba(0,0,0,.7);
     
     display: flex;
     justify-content: center;
     align-items: center;
 
-    transition: all 200ms
+    transition: all 200ms;
+    opacity: 0;
+}
+.weplayer-foot-set{
+    position: absolute;
+    z-index: 4;
+    top:100%;
+    right: -12px;
+    height: 120px;
+    width: 150px;
+    background: rgba(0,0,0,.7);
+    transition: all 200ms;
+
+    cursor: pointer;
+    overflow: hidden;
+}
+.weplayer-set-tip{
+    width: 100%;
+    height: 30px;
+    padding: 0 5px 0 10px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weplayer-set-tip:hover{
+ background: rgba(0,0,0,.5);
+}
+.weplayer-set-tip label{
+        color: #eee;
+    font-size: 14px;
+}
+
+.weplayer-set-panel-body{
+    overflow: hidden;
+    height: 0;
+    transition: height .5s;
+    background: rgba(0,0,0,.5);
+}
+.weplayer-set-panel-body li{
+    height: 20px;
+    width: 100%;
+    padding: 0 15px;
+    color: white;
+}
+
+.weplayer-set-tip .setRight{
+    height: 50%;
+    transition: transform 200ms;
 }
 .weplayer-foot-voice:hover{
     box-shadow: 0 0 5px #ccc
@@ -276,4 +339,47 @@
     25% {height:30px;transform:translateY(15px);background:#0093aa;}
     50% {height:5px;transform:translateY(0px);background:#0093aa;}
     100% {height:5px;transform:translateY(0px);background:#0093aa;}
+}
+
+.radio{
+    display: inline-block;
+    position: relative;
+    line-height: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.radio input{
+    display: none;
+}
+.radio .radio-bg{
+    display: inline-block;
+    height: 12px;
+    width: 12px;
+    margin-right: 5px;
+    padding: 0;
+    background-color: #0093aa;
+    border-radius: 100%;
+    vertical-align: top;
+    box-shadow: 0 1px 15px rgba(0, 0, 0, 0.1) inset, 0 1px 4px rgba(0, 0, 0, 0.1) inset, 1px -1px 2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.radio .radio-on{
+    display: none;
+}
+.radio input:checked + span.radio-on{
+    width: 8px;
+    height: 8px;
+    position: absolute;
+    border-radius: 100%;
+    background: #FFFFFF;
+    top: 2px;
+    left: 2px;
+    box-shadow: 0 2px 5px 1px rgba(0, 0, 0, 0.3), 0 0 1px rgba(255, 255, 255, 0.4) inset;
+    background-image: linear-gradient(#ffffff 0, #e7e7e7 100%);
+    transform: scale(0, 0);
+    transition: all 0.2s ease;
+    transform: scale(1, 1);
+    display: inline-block;
 }
